@@ -47,11 +47,11 @@ https://infosecwriteups.com/building-a-virtual-security-home-lab-part-1-network-
 - This is created to act as a management group and also to run ivestigations
 <img width="397" height="258" alt="image" src="https://github.com/user-attachments/assets/cfa2e61a-6fb0-4c04-a955-2bc299800984" />
  
-#### System Configuration & Network Configuration
-<img width="397" height="300" alt="image" src="https://github.com/user-attachments/assets/ea0a569e-3e31-467e-af50-5050e24e90e1" />
+### System Configuration & Network Configuration
 <img width="397" height="480" alt="image" src="https://github.com/user-attachments/assets/c98cbe6e-5a05-4e17-877d-eb637f682634" />
+<img width="397" height="300" alt="image" src="https://github.com/user-attachments/assets/ea0a569e-3e31-467e-af50-5050e24e90e1" />
 <img width="397" height="470" alt="image" src="https://github.com/user-attachments/assets/647e9d5f-1f32-4c2b-b81a-4963239b1af2" />
-
+ 
 #### Post-Installation Configuration 
 - Ran the command: ip a. We can see that the Kali VM has been assigned an IP address from the LAN network range.
 <img width="379" height="311" alt="image" src="https://github.com/user-attachments/assets/09375d1e-79d3-4bd9-ba5c-9c02a0518a5b" />
@@ -72,3 +72,64 @@ https://infosecwriteups.com/building-a-virtual-security-home-lab-part-1-network-
 
 #### Refresh Kali Linux IP Address 
 <img width="397" height="160" alt="image" src="https://github.com/user-attachments/assets/bf1d3bad-9f79-4125-9767-ee88bf5fc5d2" />
+
+- We want the VM to release the current IP address and use the static IP that was reserved. This can be achieved using the following command:
+
+- " sudo ip l set eth0 down && sudo ip l set eth0 up "
+
+<img width="397" height="157" alt="image" src="https://github.com/user-attachments/assets/53f99181-0ada-4666-a141-b7e2f2769958" />
+
+## pfSense Firewall Configuration
+
+- Changing the following options:
+- Action: Block
+- Address Family: Ipv4+IPv6
+- Protocol: Any
+- Source: LAN subnets
+- Destination: WAN subnets
+- Description: Block access to services on WAN interface
+
+<img width="397" height="472" alt="image" src="https://github.com/user-attachments/assets/5023044d-426f-43bd-88db-8e3c19867a77" />
+
+### CYBER_RANGE Rules
+- Before creating the rules for CYBER_RANGE we need to create a Alias.
+
+Entered the following details:
+- Name: RFC1918
+- Description: Private IPv4 Address Space
+- Type: Network(s)
+- Network 1: 10.0.0.0/8
+- Network 2: 172.16.0.0/12
+- Network 3: 192.168.0.0/16
+- Network 4: 169.254.0.0/16
+- Network 5: 127.0.0.0/8
+
+<img width="397" height="193" alt="image" src="https://github.com/user-attachments/assets/1bb248fa-dc2d-479f-8688-8c611a0019c9" />
+ 
+### ADDING RULES TO CYBER_RANGE
+- Address Family: IPv4+IPv6
+- Protocol: Any
+- Source: CYBER_RANGE subnets
+- Destination: CYBER_RANGE address
+- Description: Allow traffic to all devices on the CYBER_RANGE network
+<img width="397" height="467" alt="image" src="https://github.com/user-attachments/assets/82d92b5a-7056-47a0-b4c5-4e805e58e311" />
+
+#### Then created another rule:
+- Protocol: Any
+- Source: CYBER_RANGE subnets
+- Destination: Address or Alias - 10.0.0.2
+- Description: Allow traffic to Kali Linux VM
+
+- Protocol: Any
+- Source: CYBER_RANGE subnets
+- Destination: Address or Alias - RFC1918 (Select Invert match)
+- Description: Allow to any non-private IPv4 Address
+
+- Action: Block
+- Address Family: IPv4+IPv6
+- Protocol: Any
+- Source: CYBER_RANGE subnets
+- Description: Block access to everything
+
+<img width="397" height="327" alt="image" src="https://github.com/user-attachments/assets/6ccba114-b597-43c8-ab8d-59f2bf4bbdcb" />
+
